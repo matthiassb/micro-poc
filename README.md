@@ -59,4 +59,9 @@ Kong is used as an AWS Compliant API Gateway for local development
 docker compose up --build --watch
 ```
 
-### 
+### Connecting to Service
+
+```sh
+curl -i -X GET http://localhost:8000/customers
+```
+
