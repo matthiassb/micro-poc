@@ -1,0 +1,40 @@
+services:
+  customers:
+    build:
+      context: ./services/customers
+    container_name: customers
+    networks:
+      - shared-services
+    develop:
+      watch:
+        - action: rebuild
+          path: ./services/customers/
+          ignore:
+            - node_modules/
+
+  orders:
+    build:
+      context: ./services/orders
+    container_name: orders
+    networks:
+      - shared-services
+    develop:
+      watch:
+        - action: rebuild
+          path: ./services/orders/
+
+  kong:
+    image: kong:latest
+    container_name: kong
+    ports:
+      - "8000:8000"
+    environment:
+      KONG_DATABASE: off
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+    volumes:
+      - ./resources/kong:/usr/local/kong/declarative
+    networks:
+      - shared-services
+
+networks:
+  shared-services:

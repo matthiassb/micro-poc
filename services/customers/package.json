@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@koa/router": "^13.1.0",
+    "express": "^4.21.1",
+    "koa": "^2.15.3",
+    "serverless-http": "^3.2.0"
+  }
+}

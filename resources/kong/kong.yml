@@ -1,0 +1,43 @@
+_format_version: "3.0"
+_transform: true
+
+routes:
+- name: customers
+  paths: [ "/customers" ]
+- name: orders
+  paths: [ "/orders" ]
+
+plugins:
+- route: customers
+  name: aws-lambda
+  config:
+    aws_region: us-east-1
+    aws_key: DUMMY_KEY
+    aws_secret: DUMMY_SECRET
+    function_name: function
+    host: customers
+    port: 8080
+    awsgateway_compatible: true
+    disable_https: true
+    forward_request_body: true
+    forward_request_headers: true
+    forward_request_method: true
+    forward_request_uri: true
+    is_proxy_integration: true
+    
+- route: orders
+  name: aws-lambda
+  config:
+    aws_region: us-east-1
+    aws_key: DUMMY_KEY
+    aws_secret: DUMMY_SECRET
+    function_name: function
+    host: orders
+    port: 8080
+    awsgateway_compatible: true
+    disable_https: true
+    forward_request_body: true
+    forward_request_headers: true
+    forward_request_method: true
+    forward_request_uri: true
+    is_proxy_integration: true
