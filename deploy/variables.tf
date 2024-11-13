@@ -33,3 +33,33 @@ variable "orders_function_name" {
   type        = string
   default     = "orders-function"
 }
+
+variable "customers_docker_image_uri" {
+  description = "The URI of the Docker image for the customers microservice"
+  type        = string
+}
+
+variable "orders_docker_image_uri" {
+  description = "The URI of the Docker image for the orders microservice"
+  type        = string
+}
+
+variable "aws_account_id" {
+  description = "The AWS account ID"
+  type        = string
+}
+
+variable "lambda_execution_role" {
+  description = "The ARN of the IAM role for Lambda execution"
+  type        = string
+}
+
+variable "ecr_repository" {
+  description = "The name of the ECR repository"
+  type        = string
+}
+
+variable "microservices" {
+  description = "List of microservices"
+  type        = list(string)
+}

@@ -81,3 +81,58 @@ curl -i -X GET http://localhost:8000/customers
 
 This will deploy the API Gateway and the microservices to AWS.
 
+### Setting up Github Actions CI/CD Pipeline
+
+1. Create a new file `.github/workflows/ci-cd.yml` in your repository.
+2. Add the following content to the file:
+   ```yaml
+   name: CI/CD Pipeline
+
+   on:
+     push:
+       branches:
+         - main
+     pull_request:
+       branches:
+         - main
+
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v2
+
+         - name: Set up Docker Buildx
+           uses: docker/setup-buildx-action@v1
+
+         - name: Log in to Amazon ECR
+           id: login-ecr
+           uses: aws-actions/amazon-ecr-login@v1
+
+         - name: Build and push Docker images
+           run: |
+             for service in $(ls services); do
+               docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$service:latest services/$service
+               docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$service:latest
+             done
+
+         - name: Set up Terraform
+           uses: hashicorp/setup-terraform@v1
+
+         - name: Terraform Init
+           run: terraform init
+           working-directory: deploy
+
+         - name: Terraform Apply
+           run: terraform apply -auto-approve
+           working-directory: deploy
+           env:
+             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+             AWS_REGION: ${{ secrets.AWS_REGION }}
+   ```
+3. Commit and push the changes to your repository.
+
+This will set up a CI/CD pipeline using Github Actions to build and push Docker images to ECR and deploy the infrastructure using Terraform.
