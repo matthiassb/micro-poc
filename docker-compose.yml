@@ -36,5 +36,16 @@ services:
     networks:
       - shared-services
 
+  locations:
+    build:
+      context: ./services/locations
+    container_name: locations
+    networks:
+      - shared-services
+    develop:
+      watch:
+        - action: rebuild
+          path: ./services/locations/
+
 networks:
   shared-services:

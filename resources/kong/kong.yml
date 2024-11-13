@@ -6,6 +6,8 @@ routes:
   paths: [ "/customers" ]
 - name: orders
   paths: [ "/orders" ]
+- name: locations
+  paths: [ "/locations" ]
 
 plugins:
 - route: customers
@@ -33,6 +35,23 @@ plugins:
     aws_secret: DUMMY_SECRET
     function_name: function
     host: orders
+    port: 8080
+    awsgateway_compatible: true
+    disable_https: true
+    forward_request_body: true
+    forward_request_headers: true
+    forward_request_method: true
+    forward_request_uri: true
+    is_proxy_integration: true
+
+- route: locations
+  name: aws-lambda
+  config:
+    aws_region: us-east-1
+    aws_key: DUMMY_KEY
+    aws_secret: DUMMY_SECRET
+    function_name: function
+    host: locations
     port: 8080
     awsgateway_compatible: true
     disable_https: true

@@ -52,6 +52,11 @@ Kong is used as an AWS Compliant API Gateway for local development
 3. Add the new service to the `kong.yml` file.
 4. Restart docker compose.
 
+<!-- Pe8a8 -->
+1. Create a new directory under the `services` for `locations`. Include a Dockerfile and any necessary files. See `./services/locations` for an example.
+2. Add the new service to the `docker-compose.yml` file.
+3. Add the new service to the `kong.yml` file.
+4. Restart docker compose.
 
 ### Starting the services
 
