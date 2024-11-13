@@ -1,0 +1,8 @@
+aws_region = "us-east-1"
+api_gateway_name = "microservices-api-gateway"
+customers_function_filename = "../services/customers/index.js"
+customers_function_name = "customers-function"
+orders_function_filename = "../services/orders/app.py"
+orders_function_name = "orders-function"
+customers_docker_image_uri = "your-customers-docker-image-uri"
+orders_docker_image_uri = "your-orders-docker-image-uri"
