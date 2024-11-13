@@ -39,6 +39,7 @@ This projects uses docker to stand up a language agnostiic local development env
 ### Prerequisites
 
 * Docker
+* Terraform
 
 ### Local Development 
 
@@ -64,4 +65,19 @@ docker compose up --build --watch
 ```sh
 curl -i -X GET http://localhost:8000/customers
 ```
+
+### Deploying the API Gateway and Microservices using Terraform
+
+1. Navigate to the `deploy` directory.
+2. Initialize Terraform:
+   ```sh
+   terraform init
+   ```
+3. Apply the Terraform configuration:
+   ```sh
+   terraform apply
+   ```
+4. Follow the prompts to confirm the deployment.
+
+This will deploy the API Gateway and the microservices to AWS.
 
