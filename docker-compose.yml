@@ -1,10 +1,43 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: microservices
+      POSTGRES_PASSWORD: microservices
+      POSTGRES_DB: microservices_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shared-services
+
+  customers-migrate:
+    build:
+      context: ./services/customers
+      dockerfile: Dockerfile.migrate
+    container_name: customers-migrate
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=customers
+    networks:
+      - shared-services
+    depends_on:
+      - postgres
+
   customers:
     build:
       context: ./services/customers
     container_name: customers
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=customers
     networks:
       - shared-services
+    depends_on:
+      customers-migrate:
+        condition: service_completed_successfully
+      kong:
+        condition: service_started
     develop:
       watch:
         - action: rebuild
@@ -12,12 +45,31 @@ services:
           ignore:
             - node_modules/
 
+  orders-migrate:
+    build:
+      context: ./services/orders
+      dockerfile: Dockerfile.migrate
+    container_name: orders-migrate
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=orders
+    networks:
+      - shared-services
+    depends_on:
+      - postgres
+
   orders:
     build:
       context: ./services/orders
     container_name: orders
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=orders
     networks:
       - shared-services
+    depends_on:
+      orders-migrate:
+        condition: service_completed_successfully
+      kong:
+        condition: service_started
     develop:
       watch:
         - action: rebuild
@@ -36,12 +88,31 @@ services:
     networks:
       - shared-services
 
+  locations-migrate:
+    build:
+      context: ./services/locations
+      dockerfile: Dockerfile.migrate
+    container_name: locations-migrate
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=locations
+    networks:
+      - shared-services
+    depends_on:
+      - postgres
+
   locations:
     build:
       context: ./services/locations
     container_name: locations
+    environment:
+      DATABASE_URL: postgresql://microservices:microservices@postgres:5432/microservices_db?schema=locations
     networks:
       - shared-services
+    depends_on:
+      locations-migrate:
+        condition: service_completed_successfully
+      kong:
+        condition: service_started
     develop:
       watch:
         - action: rebuild
@@ -49,3 +120,6 @@ services:
 
 networks:
   shared-services:
+
+volumes:
+  postgres_data:

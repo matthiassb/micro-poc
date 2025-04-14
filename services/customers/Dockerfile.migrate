@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+COPY .sequelizerc ./
+
+# Install dependencies
+RUN npm install
+
+# Copy migration files
+COPY config ./config
+COPY models ./models
+COPY db ./db
+
+# Set the command to run migrations
+CMD ["npm", "run", "migrate"]

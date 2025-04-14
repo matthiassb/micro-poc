@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  host: <%= ENV['DB_HOST'] || 'postgres' %>
+  port: <%= ENV['DB_PORT'] || 5432 %>
+  database: <%= ENV['DB_NAME'] || 'microservices_db' %>
+  username: <%= ENV['DB_USER'] || 'microservices' %>
+  password: <%= ENV['DB_PASSWORD'] || 'microservices' %>
+  schema_search_path: <%= ENV['DB_SCHEMA'] || 'locations' %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  database: <%= ENV['DB_NAME'] || 'microservices_db' %>_test
+
+production:
+  <<: *default

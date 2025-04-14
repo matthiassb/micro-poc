@@ -1,4 +1,11 @@
 source 'https://rubygems.org'
 
 gem 'sinatra'
+gem 'sinatra-contrib'
 gem 'json'
+gem 'rack-cors'
+gem 'pg'
+gem 'sinatra-activerecord'
+gem 'activerecord'
+gem 'rake'
+gem 'rack'

@@ -1,143 +1,168 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+# Micro POC
 
+A container-based microservices proof of concept using Kong API Gateway, with services written in multiple languages (Node.js, Ruby, Python).
 
+## Architecture
 
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
+- **API Gateway**: Kong for routing and API management
+- **Services**:
+  - `customers` (Node.js): Customer management service
+  - `locations` (Ruby/Sinatra): Location management service
+  - `orders` (Python): Order processing service
+- **Database**: PostgreSQL for data persistence
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
+## Prerequisites
 
-<h3 align="center">Micro POC</h3>
+- Docker and Docker Compose
 
-  <p align="center">
-    Container-Based Lambda/Serverless POC
-</div>
+## Local Development Setup
 
+1. Clone the repository
+2. Start the services:
+   ```sh
+   docker compose up --build --watch
+   ```
+   This will start:
+   - Kong API Gateway (port 8000)
+   - PostgreSQL database
+   - All microservices
+   
+   Note: When changes are made in the appropriate folders, migrations will automatically run and services will be auto-built and auto-restarted thanks to the `--watch` flag.
 
+### Available Endpoints
 
+All services are accessible through Kong at `http://localhost:8000`:
 
-## Getting Started
-
-This projects uses docker to stand up a language agnostiic local development environment for creating serverless functions based on containers.
-
-### Prerequisites
-
-* Docker
-* Terraform
-
-### Local Development 
-
-Kong is used as an AWS Compliant API Gateway for local development
-
-
-### Adding a Service
-
-1. Create a new directory under the `services`. Include a Dockerfile and any necessary files. See `./services/customers` for an example.
-2. Add the new service to the `docker-compose.yml` file.
-3. Add the new service to the `kong.yml` file.
-4. Restart docker compose.
-
-<!-- Pe8a8 -->
-1. Create a new directory under the `services` for `locations`. Include a Dockerfile and any necessary files. See `./services/locations` for an example.
-2. Add the new service to the `docker-compose.yml` file.
-3. Add the new service to the `kong.yml` file.
-4. Restart docker compose.
-
-### Starting the services
+- Customers Service:
+  ```sh
+  curl -i -X GET http://localhost:8000/customers
+  ```
+- Locations Service:
+  ```sh
+  curl -i -X GET http://localhost:8000/locations
+  ```
+- Orders Service:
+  ```sh
+  curl -i -X GET http://localhost:8000/orders
+  ```
 
 ```sh
-docker compose up --build --watch
+curl --location '127.0.0.1:8000/locations' \
+--data-raw '{"firstName":"matthias","lastName":"brooks", "email": "matthias.brooks@live.com"}' |  jq 
+
+{
+  "id": 1,
+  "firstName": "matthias",
+  "lastName": "brooks",
+  "email": "matthias.brooks@live.com",
+  "updatedAt": "2025-04-14T10:51:56.861Z",
+  "createdAt": "2025-04-14T10:51:56.861Z",
+  "phone": null
+}
 ```
 
-### Connecting to Service
+### Adding a New Service
 
-```sh
-curl -i -X GET http://localhost:8000/customers
-```
-
-### Deploying the API Gateway and Microservices using Terraform
-
-1. Navigate to the `deploy` directory.
-2. Initialize Terraform:
-   ```sh
-   terraform init
+1. Create a new directory under `services/` with your service code and a Dockerfile
    ```
-3. Apply the Terraform configuration:
-   ```sh
-   terraform apply
+   services/
+   └── your-service/
+       ├── Dockerfile
+       └── [service files]
    ```
-4. Follow the prompts to confirm the deployment.
 
-This will deploy the API Gateway and the microservices to AWS.
-
-### Setting up Github Actions CI/CD Pipeline
-
-1. Create a new file `.github/workflows/ci-cd.yml` in your repository.
-2. Add the following content to the file:
+2. Add the service to `docker-compose.yml`:
    ```yaml
-   name: CI/CD Pipeline
-
-   on:
-     push:
-       branches:
-         - main
-     pull_request:
-       branches:
-         - main
-
-   jobs:
-     build:
-       runs-on: ubuntu-latest
-
-       steps:
-         - name: Checkout code
-           uses: actions/checkout@v2
-
-         - name: Set up Docker Buildx
-           uses: docker/setup-buildx-action@v1
-
-         - name: Log in to Amazon ECR
-           id: login-ecr
-           uses: aws-actions/amazon-ecr-login@v1
-
-         - name: Build and push Docker images
-           run: |
-             for service in $(ls services); do
-               docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$service:latest services/$service
-               docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$service:latest
-             done
-
-         - name: Set up Terraform
-           uses: hashicorp/setup-terraform@v1
-
-         - name: Terraform Init
-           run: terraform init
-           working-directory: deploy
-
-         - name: Terraform Apply
-           run: terraform apply -auto-approve
-           working-directory: deploy
-           env:
-             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-             AWS_REGION: ${{ secrets.AWS_REGION }}
+   services:
+     your-service:
+       build: ./services/your-service
+       volumes:
+         - ./services/your-service:/app
    ```
-3. Commit and push the changes to your repository.
 
-This will set up a CI/CD pipeline using Github Actions to build and push Docker images to ECR and deploy the infrastructure using Terraform.
+3. Configure the route in `resources/kong/kong.yml`:
+   ```yaml
+   services:
+     - name: your-service
+       url: http://your-service:port
+       routes:
+         - name: your-service-route
+           paths:
+             - /your-service
+   ```
+
+4. Restart the services:
+   ```sh
+   docker compose down
+   docker compose up --build --watch
+   ```
+
+## Database Migrations
+
+Each microservice has its own database migration system:
+
+### Locations Service (Ruby/Sinatra with ActiveRecord)
+
+```bash
+# Navigate to the locations service directory
+cd services/locations
+
+# Run migrations
+bundle exec rake db:migrate
+
+# Rollback the last migration
+bundle exec rake db:rollback
+
+# Create a new migration
+bundle exec rake db:create_migration NAME=add_field_to_locations
+```
+
+### Customers Service (Node.js with Sequelize)
+
+```bash
+# Navigate to the customers service directory
+cd services/customers
+
+# Run migrations
+npm run migrate
+
+# Undo the last migration
+npm run migrate:undo
+
+# Create a new migration
+npx sequelize-cli migration:generate --name add-field-to-customers
+```
+
+### Orders Service (Python with SQLAlchemy/Alembic)
+
+```bash
+# Navigate to the orders service directory
+cd services/orders
+
+# Run migrations
+alembic upgrade head
+
+# Rollback the last migration
+alembic downgrade -1
+
+# Create a new migration
+alembic revision --autogenerate -m "add field to orders"
+```
+
+## Project Structure
+
+```
+.
+├── resources/
+│   └── kong/              # Kong API Gateway configuration
+└── services/
+    ├── customers/         # Node.js service with Sequelize migrations
+    │   └── db/
+    │       └── migrations/  # Database migrations
+    ├── locations/         # Ruby/Sinatra service with ActiveRecord migrations
+    │   └── db/
+    │       └── migrate/     # Database migrations
+    └── orders/            # Python service with Alembic migrations
+        └── db/
+            └── migrations/  # Database migrations
+```

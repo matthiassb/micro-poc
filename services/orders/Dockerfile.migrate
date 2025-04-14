@@ -1,0 +1,31 @@
+FROM python:3.10-alpine
+
+WORKDIR /app
+
+# Install PostgreSQL client and required tools
+RUN apk add --no-cache postgresql-libs bash curl && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt && \
+    apk --purge del .build-deps
+
+# Add wait-for-it script to ensure PostgreSQL is ready
+RUN curl -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
+
+# Copy migration files
+COPY alembic.ini .
+COPY config ./config
+COPY models ./models
+COPY db ./db
+
+# Copy the migration script
+COPY run-migrations.sh /app/run-migrations.sh
+RUN chmod +x /app/run-migrations.sh
+
+# Set the command to run migrations
+CMD ["/app/run-migrations.sh"]

@@ -1,0 +1,22 @@
+FROM ruby:3.4-alpine
+
+WORKDIR /app
+
+# Install PostgreSQL client and build dependencies
+RUN apk add --no-cache postgresql-client postgresql-dev build-base
+
+# Copy Gemfile
+COPY Gemfile ./
+
+# Install gems
+RUN bundle install
+
+# Copy application files needed for migrations
+COPY Rakefile ./
+COPY app.rb ./
+COPY app ./app
+COPY config ./config
+COPY db ./db
+
+# Set the command to run migrations
+CMD ["rake", "db:migrate"]

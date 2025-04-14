@@ -1,0 +1,19 @@
+require 'sinatra/activerecord/rake'
+require './app'
+
+# Load all rake tasks from lib/tasks
+Dir.glob('lib/tasks/*.rake').each { |r| load r }
+
+namespace :db do
+  task :load_config do
+    ActiveRecord::Base.establish_connection(
+      adapter: 'postgresql',
+      host: ENV['DB_HOST'] || 'postgres',
+      port: ENV['DB_PORT'] || 5432,
+      database: ENV['DB_NAME'] || 'microservices_db',
+      username: ENV['DB_USER'] || 'microservices',
+      password: ENV['DB_PASSWORD'] || 'microservices',
+      schema_search_path: ENV['DB_SCHEMA'] || 'locations'
+    )
+  end
+end

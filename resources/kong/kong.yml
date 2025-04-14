@@ -8,8 +8,9 @@ routes:
   paths: [ "/orders" ]
 - name: locations
   paths: [ "/locations" ]
-
+  
 plugins:
+
 - route: customers
   name: aws-lambda
   config:
